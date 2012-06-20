@@ -10,13 +10,13 @@ import android.widget.BaseAdapter;
 public class NiceAlarmAdapter extends BaseAdapter
 {
 
-	private ArrayList<NiceAlarm> mAlarmList;
+	private ArrayList<Alarm> mAlarmList;
 	private Context mContext;
 	
 	public NiceAlarmAdapter(Context ctxt)
 	{
 		mContext = ctxt;
-		mAlarmList = new ArrayList<NiceAlarm>();
+		mAlarmList = new ArrayList<Alarm>();
 	}
 	
 	@Override
@@ -25,7 +25,7 @@ public class NiceAlarmAdapter extends BaseAdapter
 		return mAlarmList.size();
 	}
 
-	public NiceAlarm getAlarmItem(int pos)
+	public Alarm getAlarmItem(int pos)
 	{
 		return mAlarmList.get(pos);
 	}
@@ -39,7 +39,7 @@ public class NiceAlarmAdapter extends BaseAdapter
 	@Override
 	public long getItemId(int pos)
 	{
-		return getAlarmItem(pos).getId();
+		return getAlarmItem(pos).id;
 	}
 
 	@Override

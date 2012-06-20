@@ -1,8 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-    
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+
+    <com.schneenet.android.nicealarm.DontPressWithParentLayout
+        android:id="@+id/indicator"
+        android:layout_width="68dip"
+        android:layout_height="68dip"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <CheckBox
+            android:id="@+id/clock_onoff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="false"
+            android:duplicateParentState="true"
+            android:focusable="false" />
+    </com.schneenet.android.nicealarm.DontPressWithParentLayout>
+
+    <ImageView
+        android:layout_width="1dip"
+        android:layout_height="match_parent"
+        android:gravity="fill_vertical"
+        android:paddingBottom="4dip"
+        android:paddingTop="4dip"
+        android:scaleType="fitXY"
+        android:src="?android:attr/dividerVertical" />
+
+    <!--
+         A layout that displays the time.  Shows time, am/pm (if 12-hour),
+         and an optional line below, used for day/days of week
+    -->
+
+    <com.schneenet.android.nicealarm.DigitalClock
+        android:id="@+id/digitalClock"
+        android:layout_width="0dip"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingLeft="16dip"
+        android:paddingRight="16dip" >
+
+        <LinearLayout
+            android:id="@+id/time_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true" >
+
+            <TextView
+                android:id="@+id/timeDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="6dip"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/am_pm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="10dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/label"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:paddingLeft="8dip"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/daysOfWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/time_wrapper"
+            android:paddingTop="2dip"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorTertiary" />
+    </com.schneenet.android.nicealarm.DigitalClock>
 
 </LinearLayout>

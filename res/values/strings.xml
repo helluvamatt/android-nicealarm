@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nice Alarm</string>
-
+    <string name="set_alarm">Set Alarm</string>
+    <string name="add_alarm">Add Alarm</string>
+    <string name="default_label">Alarm</string>
+    <string name="never">Never</string>
+	<string name="every_day">Everyday</string>
+	<string name="day_concat"> </string>
 </resources>

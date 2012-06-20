@@ -4,18 +4,26 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="14" />
 
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".NiceAlarmConfigActivity"
-            android:label="@string/app_name" >
+            android:name=".NiceAlarmListActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AlarmListTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".AlarmEditorActivity"
+            android:label="@string/set_alarm"
+            android:theme="@style/AlarmEditorTheme" >
+            <intent-filter>
+                <action android:name="com.schneenet.android.nicealarm.ACTION_EDIT_ALARM" />
             </intent-filter>
         </activity>
     </application>
