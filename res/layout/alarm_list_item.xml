@@ -28,6 +28,7 @@
         android:paddingBottom="4dip"
         android:paddingTop="4dip"
         android:scaleType="fitXY"
+        android:contentDescription="@null"
         android:src="?android:attr/dividerVertical" />
 
     <!--
