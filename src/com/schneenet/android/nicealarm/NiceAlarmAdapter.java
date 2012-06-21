@@ -1,58 +1,94 @@
 package com.schneenet.android.nicealarm;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 import android.content.Context;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.view.View.OnClickListener;
+import android.widget.CheckBox;
+import android.widget.CursorAdapter;
+import android.widget.TextView;
 
-public class NiceAlarmAdapter extends BaseAdapter
+public class NiceAlarmAdapter extends CursorAdapter
 {
 
-	private ArrayList<Alarm> mAlarmList;
-	private Context mContext;
+	private AlarmStateToggledInterface tListener;
 	
-	public NiceAlarmAdapter(Context ctxt)
+	public NiceAlarmAdapter(Context ctxt, Cursor c, AlarmStateToggledInterface l)
 	{
-		mContext = ctxt;
-		mAlarmList = new ArrayList<Alarm>();
-	}
-	
-	@Override
-	public int getCount()
-	{
-		return mAlarmList.size();
-	}
-
-	public Alarm getAlarmItem(int pos)
-	{
-		return mAlarmList.get(pos);
-	}
-	
-	@Override
-	public Object getItem(int pos)
-	{
-		return getAlarmItem(pos);
+		super(ctxt, c, 0);
+		tListener = l;
 	}
 
 	@Override
-	public long getItemId(int pos)
+	public void bindView(View view, Context ctxt, Cursor cursor)
 	{
-		return getAlarmItem(pos).id;
-	}
+		final Alarm alarm = new Alarm(cursor);
 
-	@Override
-	public View getView(int pos, View convertView, ViewGroup parent)
-	{
-		if (convertView == null)
+		View indicator = view.findViewById(R.id.indicator);
+
+		// Set the initial state of the clock "checkbox"
+		final CheckBox clockOnOff = (CheckBox) indicator.findViewById(R.id.clock_onoff);
+		clockOnOff.setChecked(alarm.enabled);
+
+		// Clicking outside the "checkbox" should also change the state.
+		indicator.setOnClickListener(new OnClickListener()
 		{
-			convertView = LayoutInflater.from(mContext).inflate(R.layout.alarm_list_item, parent, false);
+			public void onClick(View v)
+			{
+				clockOnOff.toggle();
+				tListener.onAlarmStateToggled(alarm, clockOnOff.isChecked());
+			}
+		});
+
+		DigitalClock digitalClock = (DigitalClock) view.findViewById(R.id.digitalClock);
+
+		// set the alarm text
+		final Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR_OF_DAY, alarm.hour);
+		c.set(Calendar.MINUTE, alarm.minutes);
+		digitalClock.updateTime(c);
+
+		// Set the repeat text or leave it blank if it does not repeat.
+		TextView daysOfWeekView = (TextView) digitalClock.findViewById(R.id.daysOfWeek);
+		final String daysOfWeekStr = alarm.daysOfWeek.toString(ctxt, false);
+		if (daysOfWeekStr != null && daysOfWeekStr.length() != 0)
+		{
+			daysOfWeekView.setText(daysOfWeekStr);
+			daysOfWeekView.setVisibility(View.VISIBLE);
 		}
-		
-		// TODO Populate the view
-		
-		return convertView;
+		else
+		{
+			daysOfWeekView.setVisibility(View.GONE);
+		}
+
+		// Display the label
+		TextView labelView = (TextView) view.findViewById(R.id.label);
+		if (alarm.label != null && alarm.label.length() != 0)
+		{
+			labelView.setText(alarm.label);
+			labelView.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			labelView.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
+	public View newView(Context ctxt, Cursor c, ViewGroup parent)
+	{
+		View v = LayoutInflater.from(ctxt).inflate(R.layout.alarm_list_item, parent, false);
+		DigitalClock clock = (DigitalClock) v.findViewById(R.id.digitalClock);
+		clock.setLive(false);
+		return v;
+	}
+	
+	public interface AlarmStateToggledInterface
+	{
+		public void onAlarmStateToggled(Alarm alarm, boolean state);
 	}
 
 }

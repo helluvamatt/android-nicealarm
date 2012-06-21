@@ -24,6 +24,7 @@
             android:theme="@style/AlarmEditorTheme" >
             <intent-filter>
                 <action android:name="com.schneenet.android.nicealarm.ACTION_EDIT_ALARM" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>
