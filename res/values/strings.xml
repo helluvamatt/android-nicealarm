@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Nice Alarm</string>
+    <string name="service_label">Nice Alarm Service</string>
+    
     <string name="set_alarm">Set Alarm</string>
     <string name="add_alarm">Add Alarm</string>
     <string name="no_alarms">No Alarms</string>

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AlarmClockTheme" parent="android:Theme"/>
-    <style name="AlarmEditorTheme" parent="android:Theme"/>
+    <style name="AlarmClockTheme" parent="android:Theme.NoTitleBar" />
+    <style name="AlarmEditorTheme" parent="android:Theme" />
+    <style name="AlarmUiTheme" parent="android:Theme" />
+    <style name="TitleTheme" parent="@android:style/TextAppearance.Large">
+        <item name="android:textColor">@color/accent_color</item>
+    </style>
+    <style name="EmptyText" parent="@android:style/TextAppearance.Large">
+        <item name="android:textColor">@color/accent_color</item>
+        <item name="android:paddingLeft">15dip</item>
+        <item name="android:paddingTop">15dip</item>
+        <item name="android:paddingBottom">15dip</item>
+    </style>
 </resources>

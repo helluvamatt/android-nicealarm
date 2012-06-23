@@ -36,6 +36,9 @@ public class NiceAlarmManager
 	
 	// This Action is broadcast when the alarm should be snoozed
 	public static final String ACTION_ALARM_SNOOZE = "com.schneenet.android.nicealarm.ACTION_ALARM_SNOOZE";
+	
+	// This Action is for launching the (Nice) Alarm UI
+	public static final String ACTION_ALARM_UI = "com.schneenet.android.nicealarm.ACTION_ALARM_UI";
 
 	// This string is used when passing an Alarm object through an intent.
 	public static final String EXTRA_ALARM = "intent.extra.alarm";
@@ -47,6 +50,9 @@ public class NiceAlarmManager
 	
 	// This string is used when passing a URI referring to an alarm through an Intent
 	public static final String EXTRA_ALARM_URI = "intent.extra.alarm_uri";
+	
+	// This extra is whether the Alarm UI (AlarmActivity) should display the Nice Alarm UI
+	public static final String EXTRA_UI_NICEALARM = "intent.extra.ui_nicealarm";
 
 	// Format strings
 	final static String M12 = "h:mm aa";

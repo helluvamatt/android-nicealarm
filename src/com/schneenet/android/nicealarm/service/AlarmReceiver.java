@@ -56,48 +56,52 @@ public class AlarmReceiver extends BroadcastReceiver
 
 	private void handleIntent(Context context, Intent intent)
 	{
+		String action = intent.getAction();
 		Log.e(TAG, "****** AlarmReceiver RECEIVED INTENT *******");
 		Log.e(TAG, "Dumping Intent:");
-		Log.e(TAG, "    action=" + intent.getAction());
+		Log.e(TAG, "    action=" + action);
 		Log.e(TAG, "    hasAlarm=" + intent.hasExtra(NiceAlarmManager.EXTRA_ALARM));
 		Log.e(TAG, "    hasRawExtra=" + intent.hasExtra(NiceAlarmManager.EXTRA_ALARM_RAW));
 		Log.e(TAG, "    systemTime=" + System.currentTimeMillis());
-		Log.e(TAG, "Building alarm object...");
 
-		Alarm alarm = null;
-		// Grab the alarm from the intent. Since the remote AlarmManagerService
-		// fills in the Intent to add some extra data, it must unparcel the
-		// Alarm object. It throws a ClassNotFoundException when unparcelling.
-		// To avoid this, do the marshalling ourselves.
-		final byte[] data = intent.getByteArrayExtra(NiceAlarmManager.EXTRA_ALARM_RAW);
-		if (data != null)
+		
+		if (Intent.ACTION_BOOT_COMPLETED.equals(action) || Intent.ACTION_TIMEZONE_CHANGED.equals(action) || Intent.ACTION_DATE_CHANGED.equals(action))
 		{
-			Parcel in = Parcel.obtain();
-			in.unmarshall(data, 0, data.length);
-			in.setDataPosition(0);
-			alarm = Alarm.CREATOR.createFromParcel(in);
+			NiceAlarmManager.setNextAlarm(context);
 		}
-
-		if (alarm == null)
+		else if (NiceAlarmManager.ACTION_ALARM_ALERT.equals(action) || NiceAlarmManager.ACTION_ALARM_NICEALARM.equals(action))
 		{
-			Log.e(TAG, "Failed to parse the alarm from the intent");
+			Log.e(TAG, "Building alarm object...");
+			Alarm alarm = null;
+			// Grab the alarm from the intent. Since the remote
+			// AlarmManagerService
+			// fills in the Intent to add some extra data, it must unparcel the
+			// Alarm object. It throws a ClassNotFoundException when
+			// unparcelling.
+			// To avoid this, do the marshalling ourselves.
+			final byte[] data = intent.getByteArrayExtra(NiceAlarmManager.EXTRA_ALARM_RAW);
+			if (data != null)
+			{
+				Parcel in = Parcel.obtain();
+				in.unmarshall(data, 0, data.length);
+				in.setDataPosition(0);
+				alarm = Alarm.CREATOR.createFromParcel(in);
+			}
+			if (alarm == null)
+			{
+				Log.e(TAG, "Failed to parse the alarm from the intent");
+			}
+			else
+			{
+				Intent serviceIntent = new Intent(context, NiceAlarmService.class);
+				serviceIntent.setAction(action);
+				serviceIntent.putExtra(NiceAlarmManager.EXTRA_ALARM, alarm);
+				context.startService(serviceIntent);
+			}
 		}
 		else
 		{
-			Log.e(TAG, "Alarm:");
-			Log.e(TAG, "    id=" + alarm.id);
-			Log.e(TAG, "    enabled=" + alarm.enabled);
-			Log.e(TAG, "    label=" + alarm.label);
-			Log.e(TAG, "    hour=" + alarm.hour);
-			Log.e(TAG, "    minutes=" + alarm.minutes);
-			Log.e(TAG, "    repeat=" + alarm.daysOfWeek.toString(context, true));
-			Log.e(TAG, "    time=" + alarm.time);
-			Log.e(TAG, "    alert=" + (alarm.alert != null ? alarm.alert.toString() : Alarm.ALARM_ALERT_SILENT));
-			Log.e(TAG, "    vibrate=" + alarm.vibrate);
-			Log.e(TAG, "    niceAlarm_enabled=" + alarm.niceAlarm_enabled);
-			Log.e(TAG, "    niceAlarm_leadInSeconds=" + alarm.niceAlarm_leadInSeconds);
-			Log.e(TAG, "    niceAlarm_alert=" + (alarm.niceAlarm_alert != null ? alarm.niceAlarm_alert.toString() : Alarm.ALARM_ALERT_SILENT));
+			Log.e(TAG, "Invalid Action: " + action);
 		}
-
 	}
 }
