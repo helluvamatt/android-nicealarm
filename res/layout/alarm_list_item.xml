@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
 
-    <com.schneenet.android.nicealarm.DontPressWithParentLayout
+    <com.schneenet.android.nicealarm.ui.views.DontPressWithParentLayout
         android:id="@+id/indicator"
         android:layout_width="68dip"
         android:layout_height="68dip"
@@ -19,7 +19,7 @@
             android:clickable="false"
             android:duplicateParentState="true"
             android:focusable="false" />
-    </com.schneenet.android.nicealarm.DontPressWithParentLayout>
+    </com.schneenet.android.nicealarm.ui.views.DontPressWithParentLayout>
 
     <ImageView
         android:layout_width="1dip"
@@ -36,7 +36,7 @@
          and an optional line below, used for day/days of week
     -->
 
-    <com.schneenet.android.nicealarm.DigitalClock
+    <com.schneenet.android.nicealarm.ui.views.DigitalClock
         android:id="@+id/digitalClock"
         android:layout_width="0dip"
         android:layout_height="match_parent"
@@ -89,6 +89,6 @@
             android:paddingTop="2dip"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorTertiary" />
-    </com.schneenet.android.nicealarm.DigitalClock>
+    </com.schneenet.android.nicealarm.ui.views.DigitalClock>
 
 </LinearLayout>

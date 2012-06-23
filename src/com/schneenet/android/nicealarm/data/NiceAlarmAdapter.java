@@ -1,15 +1,17 @@
-package com.schneenet.android.nicealarm;
+package com.schneenet.android.nicealarm.data;
 
 import java.util.Calendar;
 import android.content.Context;
 import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
+import com.schneenet.android.nicealarm.R;
+import com.schneenet.android.nicealarm.ui.views.DigitalClock;
 
 public class NiceAlarmAdapter extends CursorAdapter
 {
@@ -53,7 +55,7 @@ public class NiceAlarmAdapter extends CursorAdapter
 
 		// Set the repeat text or leave it blank if it does not repeat.
 		TextView daysOfWeekView = (TextView) digitalClock.findViewById(R.id.daysOfWeek);
-		final String daysOfWeekStr = alarm.daysOfWeek.toString(ctxt, false);
+		final String daysOfWeekStr = alarm.getDaysOfWeekString(ctxt, false);
 		if (daysOfWeekStr != null && daysOfWeekStr.length() != 0)
 		{
 			daysOfWeekView.setText(daysOfWeekStr);

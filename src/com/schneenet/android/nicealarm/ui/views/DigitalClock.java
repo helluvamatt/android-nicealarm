@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.schneenet.android.nicealarm;
+package com.schneenet.android.nicealarm.ui.views;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import com.schneenet.android.nicealarm.R;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -157,7 +158,7 @@ public class DigitalClock extends RelativeLayout {
     }
 
 
-    void updateTime(Calendar c) {
+    public void updateTime(Calendar c) {
         mCalendar = c;
         updateTime();
     }
@@ -178,7 +179,7 @@ public class DigitalClock extends RelativeLayout {
         mAmPm.setShowAmPm(mFormat == M12);
     }
 
-    void setLive(boolean live) {
+    public void setLive(boolean live) {
         mLive = live;
     }
 }
