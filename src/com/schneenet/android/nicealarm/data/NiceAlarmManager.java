@@ -24,21 +24,25 @@ public class NiceAlarmManager
 
 	// This Action is for editing alarms
 	public static final String ACTION_EDIT_ALARM = "com.schneenet.android.nicealarm.ACTION_EDIT_ALARM";
-	
+
 	// This Action is for an Alarm going off
 	public static final String ACTION_ALARM_ALERT = "com.schneenet.android.nicealarm.ACTION_ALARM_ALERT";
-	
+
 	// This Action is for an Alarm's NiceAlarm starting
 	public static final String ACTION_ALARM_NICEALARM = "com.schneenet.android.nicealarm.ACTION_ALARM_NICEALARM";
-	
-	// This Action is broadcast when the alarm is silenced either by the user or after a timeout of 30 minutes
+
+	// This Action is broadcast when the alarm is silenced either by the user or
+	// after a timeout of 30 minutes
 	public static final String ACTION_ALARM_SILENCE = "com.schneenet.android.nicealarm.ACTION_ALARM_SILENCE";
-	
+
 	// This Action is broadcast when the alarm should be snoozed
 	public static final String ACTION_ALARM_SNOOZE = "com.schneenet.android.nicealarm.ACTION_ALARM_SNOOZE";
-	
+
 	// This Action is for launching the (Nice) Alarm UI
 	public static final String ACTION_ALARM_UI = "com.schneenet.android.nicealarm.ACTION_ALARM_UI";
+
+	// This Broadcast Action is for shutting down the UI
+	public static final String ACTION_ALARMUI_FINISH = "com.schneenet.android.nicealarm.ACTION_ALARMUI_FINISH";
 
 	// This string is used when passing an Alarm object through an intent.
 	public static final String EXTRA_ALARM = "intent.extra.alarm";
@@ -47,11 +51,13 @@ public class NiceAlarmManager
 	// AlarmManagerService to avoid a ClassNotFoundException when filling in
 	// the Intent extras.
 	public static final String EXTRA_ALARM_RAW = "intent.extra.alarm_raw";
-	
-	// This string is used when passing a URI referring to an alarm through an Intent
+
+	// This string is used when passing a URI referring to an alarm through an
+	// Intent
 	public static final String EXTRA_ALARM_URI = "intent.extra.alarm_uri";
-	
-	// This extra is whether the Alarm UI (AlarmActivity) should display the Nice Alarm UI
+
+	// This extra is whether the Alarm UI (AlarmActivity) should display the
+	// Nice Alarm UI
 	public static final String EXTRA_UI_NICEALARM = "intent.extra.ui_nicealarm";
 
 	// Format strings
@@ -66,15 +72,29 @@ public class NiceAlarmManager
 
 	/**
 	 * Given an Alarm object, return a time suitable for setting in
+	 * AlarmManager. Exclude Nice Alarm, because this is for setting the actual
+	 * alarm alert.
+	 * 
+	 * @param alarm
+	 *            Alarm object
+	 * @return time in millis since epoch
+	 */
+	public static long calculateAlarmAlert(Alarm alarm)
+	{
+		return calculateAlarm(alarm.hour, alarm.minutes, alarm.daysOfWeek).getTimeInMillis();
+	}
+
+	/**
+	 * Given an Alarm object, return a time suitable for setting in
 	 * AlarmManager, accounting for Nice alarm
 	 * 
 	 * @param alarm
 	 *            object
 	 * @return time in millis since epoch
 	 */
-	public static long calculateAlarm(Alarm alarm)
+	public static long calculateNiceAlarm(Alarm alarm)
 	{
-		long alarmTime = calculateAlarm(alarm.hour, alarm.minutes, alarm.daysOfWeek).getTimeInMillis();
+		long alarmTime = calculateAlarmAlert(alarm);
 		if (alarm.niceAlarm_enabled && alarm.niceAlarm_leadInSeconds > 0)
 		{
 			return alarmTime - alarm.niceAlarm_leadInSeconds * 1000;
@@ -197,7 +217,7 @@ public class NiceAlarmManager
 		long time = 0;
 		if (!alarm.daysOfWeek.isRepeatSet())
 		{
-			time = calculateAlarm(alarm);
+			time = calculateNiceAlarm(alarm);
 		}
 
 		values.put(Alarm.Columns.ENABLED, alarm.enabled ? 1 : 0);
@@ -235,7 +255,7 @@ public class NiceAlarmManager
 		ContentValues values = createContentValues(alarm);
 		Uri uri = context.getContentResolver().insert(Alarm.Columns.CONTENT_URI, values);
 		alarm.id = (int) ContentUris.parseId(uri);
-		long timeInMillis = calculateAlarm(alarm);
+		long timeInMillis = calculateNiceAlarm(alarm);
 		setNextAlarm(context);
 		Log.e(TAG, "alarm (id = " + alarm.id + ") fires at " + timeInMillis + " (systemTime=" + System.currentTimeMillis() + ")");
 		return timeInMillis;
@@ -256,7 +276,7 @@ public class NiceAlarmManager
 		ContentValues values = createContentValues(alarm);
 		ContentResolver resolver = context.getContentResolver();
 		resolver.update(ContentUris.withAppendedId(Alarm.Columns.CONTENT_URI, alarm.id), values, null, null);
-		long timeInMillis = calculateAlarm(alarm);
+		long timeInMillis = calculateNiceAlarm(alarm);
 		setNextAlarm(context);
 		return timeInMillis;
 	}
@@ -346,7 +366,7 @@ public class NiceAlarmManager
 			long time = 0;
 			if (!alarm.daysOfWeek.isRepeatSet())
 			{
-				time = calculateAlarm(alarm);
+				time = calculateNiceAlarm(alarm);
 			}
 			values.put(Alarm.Columns.ALARM_TIME, time);
 		}
@@ -384,7 +404,7 @@ public class NiceAlarmManager
 			// If time is not set, calculate it (for repeating alarms)
 			if (alarm.time == 0)
 			{
-				alarm.time = calculateAlarm(alarm);
+				alarm.time = calculateNiceAlarm(alarm);
 			}
 
 			// Check if expired
@@ -433,6 +453,39 @@ public class NiceAlarmManager
 	}
 
 	/**
+	 * Called when a NiceAlarm is triggered, this will schedule a broadcast to
+	 * be sent to inform the service that it is time to trigger the actual alarm
+	 * alert
+	 * 
+	 * @param context
+	 *            Context reference
+	 * @param alarm
+	 *            Alarm object
+	 */
+	public static void scheduleAlarmAlert(Context context, final Alarm alarm)
+	{
+		enableAlert(context, alarm, calculateAlarmAlert(alarm));
+	}
+
+	/**
+	 * Called when the user wants to snooze an alarm, this will schedule a
+	 * broadcast to be sent to relaunch the alarm after the snooze period is up
+	 * 
+	 * @param context
+	 *            Context reference
+	 * @param alarm
+	 *            Alarm object
+	 * @param snoozeDelta
+	 *            This number is added to calculateAlarmAlert(alarm) to get the
+	 *            time that the alarm should go off again
+	 */
+	public static void scheduleSnoozedAlarm(Context context, final Alarm alarm, long snoozeDelta)
+	{
+		long alarmTime = calculateAlarmAlert(alarm) + snoozeDelta;
+		enableAlert(context, alarm, alarmTime);
+	}
+
+	/**
 	 * Sets alert in AlarmManger and StatusBar. This is what will
 	 * actually launch the alert when the alarm triggers.
 	 * 
@@ -443,7 +496,7 @@ public class NiceAlarmManager
 	 */
 	private static void enableAlert(Context context, final Alarm alarm, final long atTimeInMillis)
 	{
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		AlarmManager am = getAlarmManager(context);
 		Intent intent = new Intent(ACTION_ALARM_ALERT);
 
 		// XXX: This is a slight hack to avoid an exception in the remote
@@ -472,7 +525,7 @@ public class NiceAlarmManager
 	 */
 	private static void disableAlert(Context context)
 	{
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		AlarmManager am = getAlarmManager(context);
 		PendingIntent sender = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_ALARM_ALERT), PendingIntent.FLAG_CANCEL_CURRENT);
 		am.cancel(sender);
 	}
@@ -487,6 +540,18 @@ public class NiceAlarmManager
 	private static Cursor getEnabledAlarms(ContentResolver contentResolver)
 	{
 		return contentResolver.query(Alarm.Columns.CONTENT_URI, Alarm.Columns.ALARM_QUERY_COLUMNS, Alarm.Columns.ENABLED + "=1", null, Alarm.Columns.DEFAULT_SORT_ORDER);
+	}
+
+	/**
+	 * Get the AlarmManager system service
+	 * 
+	 * @param context
+	 *            Context to query system services
+	 * @return AlarmManager reference
+	 */
+	public static AlarmManager getAlarmManager(Context context)
+	{
+		return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 	}
 
 }

@@ -2,5 +2,5 @@
 <resources>
     <style name="AlarmListTheme" parent="android:Theme.Holo.DialogWhenLarge.NoActionBar"/>
     <style name="AlarmEditorTheme" parent="android:Theme.Holo.DialogWhenLarge"/>
-    <style name="AlarmUiTheme" parent="android:Theme.Holo.DialogWhenLarge" />
+    <style name="AlarmUiTheme" parent="android:Theme.Holo.Wallpaper.NoTitleBar" />
 </resources>

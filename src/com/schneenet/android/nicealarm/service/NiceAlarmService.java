@@ -1,24 +1,18 @@
 package com.schneenet.android.nicealarm.service;
 
-import com.schneenet.android.nicealarm.data.Alarm;
-import com.schneenet.android.nicealarm.data.NiceAlarmManager;
-import com.schneenet.android.nicealarm.util.AlarmAlertWakeLock;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
+import com.schneenet.android.nicealarm.data.Alarm;
+import com.schneenet.android.nicealarm.data.NiceAlarmManager;
+import com.schneenet.android.nicealarm.util.AlarmAlertWakeLock;
+import com.schneenet.android.nicealarm.util.AlarmNotificationManager;
 
 public class NiceAlarmService extends Service
 {
 	
 	public static final String TAG = "NiceAlarmService";
-
-	// Define Service states, used when the service is started and we receive
-	public static final int STATE_DEFAULT = 0;
-	public static final int STATE_NICE_PLAYING = 1;
-	public static final int STATE_ALARM_PLAYING = 2;
-	public static final int STATE_SNOOZING = 3;
-	private int mCurrentState = STATE_DEFAULT;
 	
 	@Override
 	public IBinder onBind(Intent intent)
@@ -78,27 +72,35 @@ public class NiceAlarmService extends Service
 			AlarmAlertWakeLock.acquireCpuWakeLock(this);
 			
 			//     schedule broadcast of actual alarm for later
+			NiceAlarmManager.scheduleAlarmAlert(this, alarm);
 			
-			
-			//     start playing nice alarm tone
+			//     TODO start playing nice alarm tone
 			
 			
 			//     send notification to system
+			AlarmNotificationManager.sendAlertNotification(this, alarm);
 			
 			
 			//     launch nice alarm ui
-			launchUi(alarm, true);
+			Intent launchIntent = getLaunchIntent(alarm, true);
+			startActivity(launchIntent);
 			
 		}
 		// else if (action is ACTION_ALARM_ALERT)
 		else if (NiceAlarmManager.ACTION_ALARM_ALERT.equals(action))
 		{
-			//     start playing alarm tone
-			//     send notification to system
+			//     get a full wake lock
+			AlarmAlertWakeLock.acquireCpuWakeLock(this);
 			
+			//     TODO start playing alarm tone
+			
+			
+			//     send notification to system
+			AlarmNotificationManager.sendAlertNotification(this, alarm);
 			
 			//     launch alarm ui
-			launchUi(alarm, false);
+			Intent launchIntent = getLaunchIntent(alarm, false);
+			startActivity(launchIntent);
 			
 			//     if (alarm is non-repeating)
 			if (!alarm.daysOfWeek.isRepeatSet())
@@ -111,22 +113,44 @@ public class NiceAlarmService extends Service
 		// else if (action is ACTION_ALARM_SILENCE)
 		else if (NiceAlarmManager.ACTION_ALARM_SILENCE.equals(action))
 		{
-			//     stop playing tone
-			//     clear notification
+			//     TODO stop playing tone
+			
+			
+			//     send silenced notification
+			AlarmNotificationManager.sendSilencedNotification(this, alarm);
+			
 			//     broadcast to ui to shutdown
+			sendBroadcast(new Intent(NiceAlarmManager.ACTION_ALARMUI_FINISH));
+			
 			//     release ALL wake locks
+			AlarmAlertWakeLock.releaseCpuLock();
+			
 			//     stop service (self)
+			// stopSelf();
 		}
 		// else if (action is ACTION_ALARM_SNOOZE)
 		else if (NiceAlarmManager.ACTION_ALARM_SNOOZE.equals(action))
 		{
-			//     stop playing alarm tone
+			//     TODO stop playing alarm tone
+			
 			//     update notification to snooze
-			//     reschedule alarm for later:
-			//          snooze alarm: later = now + TIMEOUT
-			//          snooze nice alarm: later = actual alarm
-			//     release ALL wake locks
+			AlarmNotificationManager.sendSnoozingNotification(this, alarm);
+			
+			//     if we are after the actual alarm time
+			if (System.currentTimeMillis() > NiceAlarmManager.calculateAlarmAlert(alarm))
+			{
+				// calculate when the snooze alarm should reactivate
+				// TODO long snoozeDelta = 
+				
+				// reschedule the snooze alarm for that time
+				// NiceAlarmManager.scheduleSnoozedAlarm(this, alarm, snoozeDelta);
+			}
+			
 			//     broadcast to ui to shutdown
+			sendBroadcast(new Intent(NiceAlarmManager.ACTION_ALARMUI_FINISH));
+			
+			//     release ALL wake locks
+			AlarmAlertWakeLock.releaseCpuLock();
 		}
 		else
 		{
@@ -135,12 +159,12 @@ public class NiceAlarmService extends Service
 		return Service.START_NOT_STICKY;
 	}
 	
-	private void launchUi(Alarm alarm, boolean niceAlarm)
+	public static Intent getLaunchIntent(Alarm alarm, boolean niceAlarm)
 	{
 		Intent intent = new Intent(NiceAlarmManager.ACTION_ALARM_UI);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
 		intent.putExtra(NiceAlarmManager.EXTRA_UI_NICEALARM, niceAlarm);
-		startActivity(intent);
+		return intent;
 	}
 	
 }

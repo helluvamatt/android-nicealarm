@@ -26,6 +26,10 @@
 	<string name="nice_alert">Nice Alarm Tone</string>
 	<string name="nice_leadin">Nice Alarm Lead-In Time</string>
 	
+	<string name="alert_title">Nice Alarm</string>
+	<string name="alert_title_silenced">Nice Alarm Silenced</string>
+	<string name="alert_title_snooze">Nice Alarm Snoozing</string>
+	
 	<!-- Alarm confirmation toast: Describes how long from now until
          alarm fires -->
     <string-array name="alarm_set">
